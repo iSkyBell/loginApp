@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { UsuarioModel } from '../models/usuario.model';
+import { map } from 'rxjs/operators';
+
 
 @Injectable({
   providedIn: 'root'
@@ -8,16 +10,56 @@ import { UsuarioModel } from '../models/usuario.model';
 export class AuthService {
 
   private url = 'https://identitytoolkit.googleapis.com/v1/accounts:';
-  private apiKey = 'AIzaSyBgZ_QMCqgnFN3GIi0YBcVis4E4uX7Rw18';
-  //Crear nuevo usuario
-  //https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=[API_KEY]
+  private apiInfo = 'AIzaSyBgZ_QMCqgnFN3GIi0YBcVis4E4uX7Rw18';
+  userToken: string;
 
-  //login
-  //https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=[API_KEY]
-  constructor(private http: HttpClient) { }
+  constructor(private httpClient: HttpClient) {
+    this.readToken();
+  }
 
   logout(){}
-  signUp(usuario: UsuarioModel){}
-  signIn(usuario: UsuarioModel){}
+
+  signUp(usuario: UsuarioModel){
+    const authData = {
+      email: usuario.email,
+      password: usuario.password,
+      returnSecureToken: true
+    }
+
+    return this.httpClient.post(`${this.url}signUp?key=${this.apiInfo}`,
+                                  authData)
+                          .pipe(
+                            map(response => {
+                              this.saveToken(response['idToken']);
+                              return response;
+                            })
+                          );
+
+  }
+  
+  signIn(usuario: UsuarioModel){
+    const authData = {
+      email: usuario.email,
+      password: usuario.password,
+      returnSecureToken: true
+    }
+    return this.httpClient.post(`${this.url}signInWithPassword?key=${this.apiInfo}`,
+                                  authData)
+                          .pipe(
+                            map(response => {
+                              this.saveToken(response['idToken']);
+                              return response;
+                            })
+                          );
+  }
+
+  private saveToken(idToken: string){
+    this.userToken = idToken;
+    localStorage.setItem('token',this.userToken)
+  }
+
+  readToken(){
+    this.userToken = localStorage.getItem('token') ? localStorage.getItem('token') : '';
+  }
 
 }
