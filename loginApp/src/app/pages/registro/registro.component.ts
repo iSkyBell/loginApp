@@ -16,6 +16,7 @@ import { AuthService } from 'src/app/services/auth.service';
 export class RegistroComponent implements OnInit {
 
   usuario: UsuarioModel;
+  recordarme = false;
 
   constructor(private auth:AuthService, private router: Router) { }
 
@@ -38,6 +39,9 @@ export class RegistroComponent implements OnInit {
      this.auth.signUp(this.usuario)
               .subscribe( (response) => {
                 Swal.close();
+                if (this.recordarme) {
+                  localStorage.setItem('email',this.usuario.email);
+                }
                 this.router.navigateByUrl('/home');
               }, (errorResponse) => {
                 Swal.fire({
