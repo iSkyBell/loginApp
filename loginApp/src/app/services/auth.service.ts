@@ -17,7 +17,9 @@ export class AuthService {
     this.readToken();
   }
 
-  logout(){}
+  logout(){
+    localStorage.removeItem('token');
+  }
 
   signUp(usuario: UsuarioModel){
     const authData = {
@@ -60,6 +62,10 @@ export class AuthService {
 
   readToken(){
     this.userToken = localStorage.getItem('token') ? localStorage.getItem('token') : '';
+  }
+
+  isAuth(): boolean {
+    return this.userToken.length > 2;
   }
 
 }
